@@ -1,0 +1,128 @@
+// Geral
+// -------------------------
+html, body
+    margin: 0
+    padding: 0
+
+html
+    +monospace
+    min-height: 100%
+
+    color: $gray
+    background:
+        color: lightness($gray)
+
+body
+    position: relative
+    padding: 10px
+
+.switchSlide
+
+    $white: #FFFFFF
+    $black: #000000
+
+    display: inline-block
+    font-size: 1.1em
+
+    &.switchSlide--initialized
+        > input[type="radio"],
+        > label
+            z-index: 1
+            visibility: hidden
+            border: 0
+            clip: rect(0 0 0 0)
+            height: 1px
+            margin: -1px
+            overflow: hidden
+            padding: 0
+            position: absolute
+            width: 1px
+            &.focusable
+                &:active,
+                &:focus
+                    clip: auto
+                    height: auto
+                    margin: 0
+                    overflow: visible
+                    position: static
+                    width: auto
+
+    > .widgetSlide
+        display: flex
+        flex-flow: row nowrap
+        justify-content: center
+        align-items: center
+
+        position: relative
+        z-index: 2
+
+        width: auto
+        overflow: hidden
+
+        font-family: Consolas, 'Liberation Mono', Courier, monospace
+        font-size: 1em
+
+        background-color: rgba(51, 51, 51, 0.5)
+        box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 1px inset, rgba(255, 255, 255, 0.2) 0px 1px 0px
+        border-radius: 5px
+
+        user-select: none
+        user-drag: none
+        touch-select: none
+        touch-callout: none
+
+        &:before
+            content: "\0020"
+            position: absolute
+            top: 0
+            left: 49%
+            width: 1px
+            height: 100%
+            overflow: hidden
+            /* autoprefixer: off */
+            background-image: linear-gradient(top, rgba($white, 0) 0%, rgba($white, 0.3) 15%, rgba($white, 0.3) 85%, rgba($white, 0) 100%)
+            /* autoprefixer: on */
+
+            transition: opacity 0.2s
+
+        &.is-active
+            &:before
+                opacity: 0
+
+        &:focus
+            outline: none
+            > .widgetSlide__knob
+                background: linear-gradient(top, rgb(252,234,187) 0%,rgb(252,205,77) 50%,rgb(248,181,0) 51%,rgb(251,223,147) 100%)
+
+        > .widgetSlide__opt
+            position: relative
+            z-index: 2
+            text-align: center
+            box-sizing: content-box
+            padding: 8px 5px
+            pointer-events: none
+            color: rgba($gray, 0.7)
+            transition: color 0.2s
+            &.selected
+                color: rgba($black, 0.7)
+
+        > .widgetSlide__knob
+            $margin: 2
+            box-sizing: border-box
+            position: absolute
+            z-index: 1
+            top: 0
+            right: auto
+            bottom: auto
+            left: 0
+            width: auto
+            height: calc(100% - #{$margin * 2}px)
+            margin: #{$margin}px
+            background: $white
+            border: 0
+            border-radius: 5px
+            &.is-dragging
+                transition: none
+
+            &.is-active
+                opacity: 1
