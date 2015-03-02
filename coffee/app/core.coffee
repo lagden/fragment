@@ -1,27 +1,38 @@
 'use strict'
 
 define [
-  'templates/sample'
-  'draggabilly/draggabilly'
+  'classie/classie'
   'TweenLite'
   'Draggable'
   'CSSPlugin'
-], (template, Draggabilly, TweenLite, Draggable, CSSPlugin) ->
+], (classie, TweenLite, Draggable, CSSPlugin) ->
 
-  html = template
-    widget: 'widgetSlide'
-    knob: 'widgetSlide__knob'
-    opts: 'widgetSlide__opt'
-    optsMin: 'widgetSlide__opt--min'
-    optsMax: 'widgetSlide__opt--max'
-    captionMin: 'Min'
-    captionMax: 'Max'
+  # Verify
+  hasTouchEvents = 'ontouchstart' of window
+  hasPointerEvents = Boolean navigator.pointerEnabled or
+                             navigator.msPointerEnabled
+  isTouch = Boolean hasTouchEvents or
+                    hasPointerEvents
 
-  console.debug html
+  # Event
+  eventType = if isTouch then 'touchend' else 'click'
 
+  # Methods
   text = (node, txt) ->
     node.appendChild document.createTextNode(txt)
     return node
+
+  update = (endX) ->
+    k = if endX is 0 then 'off' else 'on'
+    knob.textContent = keys[k].textContent
+    return
+
+  tap = (event) ->
+    el = event.currentTarget
+    endX = parseInt el.getAttribute('data-endX'), 10
+    TweenLite.set knob, x: endX
+    update endX
+    return
 
   container = document.querySelector '.switchSlide'
   fragment = document.createDocumentFragment()
@@ -30,24 +41,22 @@ define [
   widget = document.createElement 'div'
   widget.className = 'widgetSlide'
 
-  knob = document.createElement 'div'
+  knob = text document.createElement('div'), ''
   knob.className = 'widgetSlide__knob'
 
-  optsMin = document.createElement 'div'
-  optsMin.className = 'widgetSlide__opt widgetSlide__opt--min'
-  spanMin = text document.createElement('span'), 'Min'
+  optsA = text document.createElement('div'), 'off A'
+  optsA.className = 'widgetSlide__opt widgetSlide__opt--a'
 
-  optsMax = document.createElement 'div'
-  optsMax.className = 'widgetSlide__opt widgetSlide__opt--max'
-  spanMax = text document.createElement('span'), 'Max'
+  optsB = text document.createElement('div'), 'on B'
+  optsB.className = 'widgetSlide__opt widgetSlide__opt--b'
 
-  # Append
-  optsMin.appendChild spanMin
-  optsMax.appendChild spanMax
+  keys =
+    off: optsA
+    on: optsB
 
-  widget.appendChild optsMin
+  widget.appendChild optsA
   widget.appendChild knob
-  widget.appendChild optsMax
+  widget.appendChild optsB
 
   fragment.appendChild widget
 
@@ -58,47 +67,45 @@ define [
   knobMarLeft  = parseInt knobComputedStyle.marginLeft, 10
   knobMarRight = parseInt knobComputedStyle.marginRight, 10
 
-  sMin = optsMin.getBoundingClientRect()
-  sMax = optsMax.getBoundingClientRect()
+  sA = optsA.getBoundingClientRect()
+  sB = optsB.getBoundingClientRect()
   sKnob = knob.getBoundingClientRect()
 
   sizes =
-    'sMin'   : sMin.width
-    'sMax'   : sMax.width
-    'knob'   : sKnob.width
+    'sA'     : parseInt sA.width, 10
+    'sB'     : parseInt sB.width, 10
+    'knob'   : parseInt sKnob.width, 10
     'margin' : knobMarLeft + knobMarRight
-    'max'    : Math.max sMin.width, sMax.width
+    'max'    : parseInt Math.max sA.width, sB.width, 10
 
-  optsMin.style.width   = "#{sizes.max}px"
-  optsMax.style.width   = "#{sizes.max}px"
+  optsA.style.width     = "#{sizes.max}px"
+  optsB.style.width     = "#{sizes.max}px"
   knob.style.width      = "#{sizes.max - sizes.margin}px"
   container.style.width = "#{sizes.max * 2}px"
 
-  console.log sizes
+  optsA.setAttribute 'data-endX', 0
+  optsB.setAttribute 'data-endX', sizes.max
 
-  # Draggabilly.prototype.positionDrag = Draggabilly.prototype.setLeftTop
-  # draggie = new Draggabilly knob,
-  #                           axis: 'x'
-  #                           containment: container
+  # Listener
+  optsA.addEventListener eventType, tap, false
+  optsB.addEventListener eventType, tap, false
 
-  # draggie.on 'dragMove', (instance, event, pointer) ->
-  #   console.log "#{pointer.pageX} #{instance.position.x}"
-  #   return
-
-  # draggie.on 'dragEnd', (instance, event, pointer) ->
-  #   console.log pointer
-  #   return
-
+  # Drag
   draggie = Draggable.create knob,
     bounds: container
     edgeResistance: 0.65
     type: 'x'
-    # snap:
-    #   x: (endValue) ->
-    #     Math.round(endValue / sizes.max) * sizes.max
-    onDragEnd: () ->
-      TweenLite.to knob, 0.3,
-        x: Math.round(knob._gsTransform.x / sizes.max) * sizes.max
+    lockAxis: 'x',
+    force3D: true
+    cursor: 'ew-resize'
+    onDragStart: ->
+      classie.add knob, 'is-dragging'
+      return
+    onDragEnd: ->
+      classie.remove knob, 'is-dragging'
+      endX = Math.round(knob._gsTransform.x / sizes.max) * sizes.max
+      TweenLite.set knob, x: endX
+      update endX
       return
 
   return

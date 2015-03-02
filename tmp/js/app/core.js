@@ -1,65 +1,86 @@
 'use strict';
-define(['templates/sample', 'draggabilly/draggabilly', 'TweenLite', 'Draggable', 'CSSPlugin'], function(template, Draggabilly, TweenLite, Draggable, CSSPlugin) {
-  var container, draggie, fragment, html, knob, knobComputedStyle, knobMarLeft, knobMarRight, optsMax, optsMin, sKnob, sMax, sMin, sizes, spanMax, spanMin, text, widget;
-  html = template({
-    widget: 'widgetSlide',
-    knob: 'widgetSlide__knob',
-    opts: 'widgetSlide__opt',
-    optsMin: 'widgetSlide__opt--min',
-    optsMax: 'widgetSlide__opt--max',
-    captionMin: 'Min',
-    captionMax: 'Max'
-  });
-  console.debug(html);
+define(['classie/classie', 'TweenLite', 'Draggable', 'CSSPlugin'], function(classie, TweenLite, Draggable, CSSPlugin) {
+  var container, draggie, eventType, fragment, hasPointerEvents, hasTouchEvents, isTouch, keys, knob, knobComputedStyle, knobMarLeft, knobMarRight, optsA, optsB, sA, sB, sKnob, sizes, tap, text, update, widget;
+  hasTouchEvents = 'ontouchstart' in window;
+  hasPointerEvents = Boolean(navigator.pointerEnabled || navigator.msPointerEnabled);
+  isTouch = Boolean(hasTouchEvents || hasPointerEvents);
+  eventType = isTouch ? 'touchend' : 'click';
   text = function(node, txt) {
     node.appendChild(document.createTextNode(txt));
     return node;
+  };
+  update = function(endX) {
+    var k;
+    k = endX === 0 ? 'off' : 'on';
+    knob.textContent = keys[k].textContent;
+  };
+  tap = function(event) {
+    var el, endX;
+    el = event.currentTarget;
+    endX = parseInt(el.getAttribute('data-endX'), 10);
+    TweenLite.set(knob, {
+      x: endX
+    });
+    update(endX);
   };
   container = document.querySelector('.switchSlide');
   fragment = document.createDocumentFragment();
   widget = document.createElement('div');
   widget.className = 'widgetSlide';
-  knob = document.createElement('div');
+  knob = text(document.createElement('div'), '');
   knob.className = 'widgetSlide__knob';
-  optsMin = document.createElement('div');
-  optsMin.className = 'widgetSlide__opt widgetSlide__opt--min';
-  spanMin = text(document.createElement('span'), 'Min');
-  optsMax = document.createElement('div');
-  optsMax.className = 'widgetSlide__opt widgetSlide__opt--max';
-  spanMax = text(document.createElement('span'), 'Max');
-  optsMin.appendChild(spanMin);
-  optsMax.appendChild(spanMax);
-  widget.appendChild(optsMin);
+  optsA = text(document.createElement('div'), 'off A');
+  optsA.className = 'widgetSlide__opt widgetSlide__opt--a';
+  optsB = text(document.createElement('div'), 'on B');
+  optsB.className = 'widgetSlide__opt widgetSlide__opt--b';
+  keys = {
+    off: optsA,
+    on: optsB
+  };
+  widget.appendChild(optsA);
   widget.appendChild(knob);
-  widget.appendChild(optsMax);
+  widget.appendChild(optsB);
   fragment.appendChild(widget);
   container.appendChild(fragment);
   knobComputedStyle = window.getComputedStyle(knob);
   knobMarLeft = parseInt(knobComputedStyle.marginLeft, 10);
   knobMarRight = parseInt(knobComputedStyle.marginRight, 10);
-  sMin = optsMin.getBoundingClientRect();
-  sMax = optsMax.getBoundingClientRect();
+  sA = optsA.getBoundingClientRect();
+  sB = optsB.getBoundingClientRect();
   sKnob = knob.getBoundingClientRect();
   sizes = {
-    'sMin': sMin.width,
-    'sMax': sMax.width,
-    'knob': sKnob.width,
+    'sA': parseInt(sA.width, 10),
+    'sB': parseInt(sB.width, 10),
+    'knob': parseInt(sKnob.width, 10),
     'margin': knobMarLeft + knobMarRight,
-    'max': Math.max(sMin.width, sMax.width)
+    'max': parseInt(Math.max(sA.width, sB.width, 10))
   };
-  optsMin.style.width = "" + sizes.max + "px";
-  optsMax.style.width = "" + sizes.max + "px";
+  optsA.style.width = "" + sizes.max + "px";
+  optsB.style.width = "" + sizes.max + "px";
   knob.style.width = "" + (sizes.max - sizes.margin) + "px";
   container.style.width = "" + (sizes.max * 2) + "px";
-  console.log(sizes);
+  optsA.setAttribute('data-endX', 0);
+  optsB.setAttribute('data-endX', sizes.max);
+  optsA.addEventListener(eventType, tap, false);
+  optsB.addEventListener(eventType, tap, false);
   draggie = Draggable.create(knob, {
     bounds: container,
     edgeResistance: 0.65,
     type: 'x',
+    lockAxis: 'x',
+    force3D: true,
+    cursor: 'ew-resize',
+    onDragStart: function() {
+      classie.add(knob, 'is-dragging');
+    },
     onDragEnd: function() {
-      TweenLite.to(knob, 0.3, {
-        x: Math.round(knob._gsTransform.x / sizes.max) * sizes.max
+      var endX;
+      classie.remove(knob, 'is-dragging');
+      endX = Math.round(knob._gsTransform.x / sizes.max) * sizes.max;
+      TweenLite.set(knob, {
+        x: endX
       });
+      update(endX);
     }
   });
 });
