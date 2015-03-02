@@ -5,9 +5,10 @@ define('config', function() {
     paths: {
       app: '../app',
       templates: '../templates',
-      'TweenLite': './gsap/src/uncompressed/TweenLite',
-      'Draggable': './gsap/src/uncompressed/utils/Draggable',
-      'CSSPlugin': './gsap/src/uncompressed/plugins/CSSPlugin'
+      components: '../components',
+      TweenLite: './gsap/src/uncompressed/TweenLite',
+      Draggable: './gsap/src/uncompressed/utils/Draggable',
+      CSSPlugin: './gsap/src/uncompressed/plugins/CSSPlugin'
     }
   });
 });

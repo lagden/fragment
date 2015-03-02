@@ -1213,36 +1213,12 @@ body {
   display: inline-block;
   font-size: 1.1em;
 }
-.switchSlide.switchSlide--initialized > input[type="radio"],
-.switchSlide.switchSlide--initialized > label {
-  z-index: 1;
-  visibility: hidden;
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-.switchSlide.switchSlide--initialized > input[type="radio"].focusable:active, .switchSlide.switchSlide--initialized > input[type="radio"].focusable:focus,
-.switchSlide.switchSlide--initialized > label.focusable:active,
-.switchSlide.switchSlide--initialized > label.focusable:focus {
-  clip: auto;
-  height: auto;
-  margin: 0;
-  overflow: visible;
-  position: static;
-  width: auto;
-}
 .switchSlide > .widgetSlide {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
   position: relative;
-  z-index: 2;
   width: auto;
   overflow: hidden;
   font-family: Consolas, "Liberation Mono", Courier, monospace;
@@ -1259,28 +1235,36 @@ body {
   content: " ";
   position: absolute;
   top: 0;
-  left: 49%;
+  left: calc(50% - 1px);
   width: 1px;
   height: 100%;
   overflow: hidden;
-  /* autoprefixer: off */
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 15%, rgba(255, 255, 255, 0.3) 85%, rgba(255, 255, 255, 0) 100%);
-  /* autoprefixer: on */
-  transition: opacity 0.2s;
 }
-.switchSlide > .widgetSlide.is-active:before {
-  opacity: 0;
+.switchSlide > .widgetSlide > label + input[type="radio"] {
+  visibility: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
-.switchSlide > .widgetSlide:focus {
-  outline: none;
-}
-.switchSlide > .widgetSlide:focus > .widgetSlide__knob {
-  background: linear-gradient(to bottom, #fceabb 0%, #fccd4d 50%, #f8b500 51%, #fbdf93 100%);
+.switchSlide > .widgetSlide > label + input[type="radio"].focusable:active, .switchSlide > .widgetSlide > label + input[type="radio"].focusable:focus {
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  width: auto;
 }
 .switchSlide > .widgetSlide > .widgetSlide__opt {
   white-space: nowrap;
+  text-align: center;
   position: relative;
-  z-index: 3;
+  z-index: 1;
   box-sizing: content-box;
   padding: 8px 5px;
   color: rgba(108, 108, 108, 0.7);
@@ -1289,7 +1273,7 @@ body {
 .switchSlide > .widgetSlide > .widgetSlide__knob {
   box-sizing: border-box;
   position: absolute;
-  z-index: 4;
+  z-index: 2;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -1302,6 +1286,7 @@ body {
   height: calc(100% - 4px);
   margin: 2px;
   background: #FFFFFF;
+  opacity: 0;
   border: 0;
   border-radius: 5px;
   color: rgba(108, 108, 108, 0.7);
@@ -1313,6 +1298,15 @@ body {
   transition: color 0.2s;
   color: rgba(108, 108, 108, 0);
 }
-.switchSlide > .widgetSlide > .widgetSlide__knob.is-active {
+.switchSlide > .widgetSlide.has-phase:before {
+  display: none;
+}
+.switchSlide > .widgetSlide.has-phase > .widgetSlide__knob {
   opacity: 1;
+}
+.switchSlide > .widgetSlide:focus {
+  outline: none;
+}
+.switchSlide > .widgetSlide:focus > .widgetSlide__knob {
+  background: linear-gradient(to bottom, #fceabb 0%, #fccd4d 50%, #f8b500 51%, #fbdf93 100%);
 }

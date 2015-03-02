@@ -137,6 +137,7 @@ module.exports = (grunt) ->
         tasks: ['jade:js']
 
     clean:
+      tmp: ['<%= project.tmp %>']
       dist: ['<%= project.prod %>']
 
     browserSync:
@@ -232,6 +233,7 @@ module.exports = (grunt) ->
       ]
 
   grunt.registerTask 'default', [
+    'clean:tmp'
     'concurrent:dev'
   ]
 

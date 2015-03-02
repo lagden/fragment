@@ -24,37 +24,14 @@ body
     display: inline-block
     font-size: 1.1em
 
-    &.switchSlide--initialized
-        > input[type="radio"],
-        > label
-            z-index: 1
-            visibility: hidden
-            border: 0
-            clip: rect(0 0 0 0)
-            height: 1px
-            margin: -1px
-            overflow: hidden
-            padding: 0
-            position: absolute
-            width: 1px
-            &.focusable
-                &:active,
-                &:focus
-                    clip: auto
-                    height: auto
-                    margin: 0
-                    overflow: visible
-                    position: static
-                    width: auto
-
     > .widgetSlide
+
         display: flex
         flex-flow: row nowrap
         justify-content: center
         align-items: center
 
         position: relative
-        z-index: 2
 
         width: auto
         overflow: hidden
@@ -75,31 +52,41 @@ body
             content: "\0020"
             position: absolute
             top: 0
-            left: 49%
+            left: calc(50% - 1px)
             width: 1px
             height: 100%
             overflow: hidden
-            /* autoprefixer: off */
             background-image: linear-gradient(top, rgba($white, 0) 0%, rgba($white, 0.3) 15%, rgba($white, 0.3) 85%, rgba($white, 0) 100%)
-            /* autoprefixer: on */
 
-            transition: opacity 0.2s
-
-        &.is-active
-            &:before
-                opacity: 0
-
-        &:focus
-            outline: none
-            > .widgetSlide__knob
-                background: linear-gradient(top, rgb(252,234,187) 0%,rgb(252,205,77) 50%,rgb(248,181,0) 51%,rgb(251,223,147) 100%)
+        > label
+            + input[type="radio"]
+                // display: none
+                visibility: hidden
+                border: 0
+                clip: rect(0 0 0 0)
+                height: 1px
+                margin: -1px
+                overflow: hidden
+                padding: 0
+                position: absolute
+                width: 1px
+                &.focusable
+                    &:active,
+                    &:focus
+                        clip: auto
+                        height: auto
+                        margin: 0
+                        overflow: visible
+                        position: static
+                        width: auto
 
         > .widgetSlide__opt
 
             white-space: nowrap
+            text-align: center
 
             position: relative
-            z-index: 3
+            z-index: 1
             box-sizing: content-box
             padding: 8px 5px
 
@@ -110,7 +97,7 @@ body
             $margin: 2
             box-sizing: border-box
             position: absolute
-            z-index: 4
+            z-index: 2
 
             display: flex
             flex-flow: row nowrap
@@ -128,6 +115,8 @@ body
             margin: #{$margin}px
             background: $white
 
+            opacity: 0
+
             border: 0
             border-radius: 5px
 
@@ -141,5 +130,15 @@ body
                 transition: color 0.2s
                 color: rgba($gray, 0)
 
-            &.is-active
+        &.has-phase
+            &:before
+                display: none
+
+            > .widgetSlide__knob
                 opacity: 1
+
+        &:focus
+            outline: none
+            > .widgetSlide__knob
+                background: linear-gradient(top, rgb(252,234,187) 0%,rgb(252,205,77) 50%,rgb(248,181,0) 51%,rgb(251,223,147) 100%)
+

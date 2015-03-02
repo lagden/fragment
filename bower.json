@@ -2,7 +2,7 @@
   "name": "fragment",
   "version": "0.0.1",
   "dependencies": {
-    "draggabilly": "~1.1.2",
-    "gsap": "~1.15.1"
+    "gsap": "~1.15.1",
+    "eventEmitter": "~4.2.11"
   }
 }
