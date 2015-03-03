@@ -225,7 +225,7 @@ define([
       this.events();
     };
     SwitchSlide.prototype.events = function () {
-      var draggie, onDragEndHandler, onDragStartHandler, onKeydownHandler, tapHandler;
+      var draggie, onDragEndHandler, onDragHandler, onDragStartHandler, onKeydownHandler, tapHandler;
       tapHandler = function (_this) {
         return function (event) {
           var el, endX;
@@ -258,6 +258,13 @@ define([
           classie.add(_this.knob, 'is-dragging');
         };
       }(this);
+      onDragHandler = function (_this) {
+        return function () {
+          var currentX;
+          currentX = Math.min(_this.max, Math.max(_this.knob._gsTransform.x, _this.min));
+          TweenLite.set(_this.knob, { x: currentX });
+        };
+      }(this);
       onDragEndHandler = function (_this) {
         return function () {
           var endX;
@@ -277,6 +284,7 @@ define([
         force3D: true,
         cursor: 'ew-resize',
         onDragStart: onDragStartHandler,
+        onDrag: onDragHandler,
         onDragEnd: onDragEndHandler
       });
     };
