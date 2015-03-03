@@ -276,6 +276,11 @@ define [
         classie.add @knob, 'is-dragging'
         return
 
+      onDragHandler = () =>
+        currentX = Math.min @max, Math.max @knob._gsTransform.x, @min
+        TweenLite.set @knob, x: currentX
+        return
+
       onDragEndHandler = () =>
         classie.remove @knob, 'is-dragging'
         endX = Math.round(@knob._gsTransform.x / @max) * @max
@@ -296,6 +301,7 @@ define [
         force3D: true
         cursor: 'ew-resize'
         onDragStart: onDragStartHandler
+        onDrag: onDragHandler
         onDragEnd: onDragEndHandler
       return
 
