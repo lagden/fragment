@@ -18,6 +18,11 @@ define [
     return
   , false
 
+  setTimeout ->
+    sss[2].container.parentNode.className = 'pad-t-10 pad-b-10'
+    return
+  , 2000
+
   window.sss = sss
 
   return

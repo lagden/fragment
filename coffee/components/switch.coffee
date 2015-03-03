@@ -18,6 +18,9 @@ define [
   # Event
   eventType = if isTouch then 'touchend' else 'click'
 
+  # Body
+  docBody = document.querySelector 'body'
+
   # Extend object
   extend = (a, b) ->
     a[prop] = b[prop] for prop of b
@@ -32,6 +35,16 @@ define [
              typeof obj is 'object' and
              obj.nodeType is 1 and
              typeof obj.nodeName is 'string'
+
+  # Remove all children
+  removeAllChildren = (el) ->
+    while el.hasChildNodes()
+      c = el.lastChild
+      if c.hasChildNodes()
+        el.removeChild removeAllChildren(c)
+      else
+        el.removeChild c
+    return el
 
   # Append text node inside the element
   text = (node, txt) ->
@@ -55,6 +68,36 @@ define [
     radio.removeAttribute 'checked'
     radio.checked = false
     return
+
+  getSizes = (container, css) ->
+    clone = container.cloneNode true
+    clone.style.visibility = 'hidden'
+    clone.style.position   = 'absolute'
+
+    docBody.appendChild clone
+
+    widget = clone.querySelector ".#{css.widget}"
+    sA     = widget.querySelector ".#{css.optA}"
+    sB     = widget.querySelector ".#{css.optB}"
+    knob   = widget.querySelector ".#{css.knob}"
+
+    knobComputedStyle = window.getComputedStyle knob
+    knobMarLeft  = parseInt knobComputedStyle.marginLeft, 10
+    knobMarRight = parseInt knobComputedStyle.marginRight, 10
+
+    bA = sA.getBoundingClientRect()
+    bB = sB.getBoundingClientRect()
+    bKnob = knob.getBoundingClientRect()
+
+    # Remove
+    docBody.removeChild removeAllChildren(clone)
+
+    sizes =
+      'sA'     : parseInt bA.width, 10
+      'sB'     : parseInt bB.width, 10
+      'knob'   : parseInt bKnob.width, 10
+      'margin' : knobMarLeft + knobMarRight
+      'max'    : parseInt Math.max bA.width, bB.width, 10
 
   # Exception
   class SwitchSlideException
@@ -94,8 +137,8 @@ define [
             error    : ''
             widget   : ''
             opts     : ''
-            optMin   : ''
-            optMax   : ''
+            optA     : ''
+            optB     : ''
             knob     : ''
 
           extend @options, options
@@ -104,6 +147,8 @@ define [
             error  : 'widgetSlide--error'
             widget : 'widgetSlide'
             opts   : 'widgetSlide__opt'
+            optA   : 'widgetSlide__opt--a'
+            optB   : 'widgetSlide__opt--b'
             knob   : 'widgetSlide__knob'
 
           for k, v of @css
@@ -122,11 +167,17 @@ define [
       @labels = @container.getElementsByTagName 'label'
       @radios = []
 
+      labelOpts = [
+        @options.optA
+        @options.optB
+      ]
+
       if @labels.length != 2
         throw new SwitchSlideException '✖ No labels'
       else
-        for label in @labels
+        for label, idx in @labels
           classie.add label, @options.opts
+          classie.add label, labelOpts[idx]
           radio = label.nextElementSibling
           @radios.push radio
 
@@ -140,20 +191,7 @@ define [
       @widget.appendChild fragment
 
       # Size
-      knobComputedStyle = window.getComputedStyle @knob
-      knobMarLeft  = parseInt knobComputedStyle.marginLeft, 10
-      knobMarRight = parseInt knobComputedStyle.marginRight, 10
-
-      sA = @labels[0].getBoundingClientRect()
-      sB = @labels[1].getBoundingClientRect()
-      sKnob = @knob.getBoundingClientRect()
-
-      sizes =
-        'sA'     : parseInt sA.width, 10
-        'sB'     : parseInt sB.width, 10
-        'knob'   : parseInt sKnob.width, 10
-        'margin' : knobMarLeft + knobMarRight
-        'max'    : parseInt Math.max sA.width, sB.width, 10
+      sizes = getSizes @container, @css
 
       @labels[0].style.width = "#{sizes.max}px"
       @labels[1].style.width = "#{sizes.max}px"

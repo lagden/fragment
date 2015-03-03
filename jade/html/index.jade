@@ -28,12 +28,13 @@ html
           label(for='good') Good
           input#good(type='radio', title='Good', name='switchB', value='good', checked)
 
-      .switchSlide.bigger
-        .widgetSlide
-          label(for='small') Small
-          input#small(type='radio', title='Small', name='switchC', value='small', checked)
-          label(for='big') Big
-          input#big(type='radio', title='Big', name='switchC', value='big')
+      .hidden
+        .switchSlide.bigger
+          .widgetSlide
+            label(for='small') Small
+            input#small(type='radio', title='Small', name='switchC', value='small', checked)
+            label(for='big') Big
+            input#big(type='radio', title='Big', name='switchC', value='big')
 
       div
         button(type='submit') OK

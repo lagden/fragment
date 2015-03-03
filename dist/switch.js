@@ -6,11 +6,12 @@ define([
   'Draggable',
   'CSSPlugin'
 ], function (classie, EventEmitter, TweenLite, Draggable, CSSPlugin) {
-  var GUID, SwitchSlide, SwitchSlideException, checked, eventType, extend, hasPointerEvents, hasTouchEvents, instances, isElement, isTouch, text, unchecked;
+  var GUID, SwitchSlide, SwitchSlideException, checked, docBody, eventType, extend, getSizes, hasPointerEvents, hasTouchEvents, instances, isElement, isTouch, removeAllChildren, text, unchecked;
   hasTouchEvents = 'ontouchstart' in window;
   hasPointerEvents = Boolean(navigator.pointerEnabled || navigator.msPointerEnabled);
   isTouch = Boolean(hasTouchEvents || hasPointerEvents);
   eventType = isTouch ? 'touchend' : 'click';
+  docBody = document.querySelector('body');
   extend = function (a, b) {
     var prop;
     for (prop in b) {
@@ -25,6 +26,18 @@ define([
       return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
     }
   };
+  removeAllChildren = function (el) {
+    var c;
+    while (el.hasChildNodes()) {
+      c = el.lastChild;
+      if (c.hasChildNodes()) {
+        el.removeChild(removeAllChildren(c));
+      } else {
+        el.removeChild(c);
+      }
+    }
+    return el;
+  };
   text = function (node, txt) {
     node.appendChild(document.createTextNode(txt));
     return node;
@@ -38,6 +51,31 @@ define([
   unchecked = function (radio) {
     radio.removeAttribute('checked');
     radio.checked = false;
+  };
+  getSizes = function (container, css) {
+    var bA, bB, bKnob, clone, knob, knobComputedStyle, knobMarLeft, knobMarRight, sA, sB, sizes, widget;
+    clone = container.cloneNode(true);
+    clone.style.visibility = 'hidden';
+    clone.style.position = 'absolute';
+    docBody.appendChild(clone);
+    widget = clone.querySelector('.' + css.widget);
+    sA = widget.querySelector('.' + css.optA);
+    sB = widget.querySelector('.' + css.optB);
+    knob = widget.querySelector('.' + css.knob);
+    knobComputedStyle = window.getComputedStyle(knob);
+    knobMarLeft = parseInt(knobComputedStyle.marginLeft, 10);
+    knobMarRight = parseInt(knobComputedStyle.marginRight, 10);
+    bA = sA.getBoundingClientRect();
+    bB = sB.getBoundingClientRect();
+    bKnob = knob.getBoundingClientRect();
+    docBody.removeChild(removeAllChildren(clone));
+    return sizes = {
+      'sA': parseInt(bA.width, 10),
+      'sB': parseInt(bB.width, 10),
+      'knob': parseInt(bKnob.width, 10),
+      'margin': knobMarLeft + knobMarRight,
+      'max': parseInt(Math.max(bA.width, bB.width, 10))
+    };
   };
   SwitchSlideException = function () {
     function SwitchSlideException(message, name) {
@@ -72,8 +110,8 @@ define([
             error: '',
             widget: '',
             opts: '',
-            optMin: '',
-            optMax: '',
+            optA: '',
+            optB: '',
             knob: ''
           };
           extend(this.options, options);
@@ -81,6 +119,8 @@ define([
             error: 'widgetSlide--error',
             widget: 'widgetSlide',
             opts: 'widgetSlide__opt',
+            optA: 'widgetSlide__opt--a',
+            optB: 'widgetSlide__opt--b',
             knob: 'widgetSlide__knob'
           };
           ref = this.css;
@@ -94,19 +134,24 @@ define([
       }
     }
     SwitchSlide.prototype.build = function () {
-      var configObserver, fragment, hasMutation, i, k, knobComputedStyle, knobMarLeft, knobMarRight, label, len, observer, observerHandler, radio, ref, sA, sB, sKnob, sizes;
+      var configObserver, fragment, hasMutation, i, idx, k, label, labelOpts, len, observer, observerHandler, radio, ref, sizes;
       fragment = document.createDocumentFragment();
       this.widget = this.container.querySelector('.' + this.css.widget);
       this.widget.setAttribute('tabindex', 0);
       this.labels = this.container.getElementsByTagName('label');
       this.radios = [];
+      labelOpts = [
+        this.options.optA,
+        this.options.optB
+      ];
       if (this.labels.length !== 2) {
         throw new SwitchSlideException('\u2716 No labels');
       } else {
         ref = this.labels;
-        for (i = 0, len = ref.length; i < len; i++) {
-          label = ref[i];
+        for (idx = i = 0, len = ref.length; i < len; idx = ++i) {
+          label = ref[idx];
           classie.add(label, this.options.opts);
+          classie.add(label, labelOpts[idx]);
           radio = label.nextElementSibling;
           this.radios.push(radio);
         }
@@ -117,19 +162,7 @@ define([
       this.knob.appendChild(this.knobSpan);
       fragment.appendChild(this.knob);
       this.widget.appendChild(fragment);
-      knobComputedStyle = window.getComputedStyle(this.knob);
-      knobMarLeft = parseInt(knobComputedStyle.marginLeft, 10);
-      knobMarRight = parseInt(knobComputedStyle.marginRight, 10);
-      sA = this.labels[0].getBoundingClientRect();
-      sB = this.labels[1].getBoundingClientRect();
-      sKnob = this.knob.getBoundingClientRect();
-      sizes = {
-        'sA': parseInt(sA.width, 10),
-        'sB': parseInt(sB.width, 10),
-        'knob': parseInt(sKnob.width, 10),
-        'margin': knobMarLeft + knobMarRight,
-        'max': parseInt(Math.max(sA.width, sB.width, 10))
-      };
+      sizes = getSizes(this.container, this.css);
       this.labels[0].style.width = sizes.max + 'px';
       this.labels[1].style.width = sizes.max + 'px';
       this.knob.style.width = sizes.max - sizes.margin + 'px';
