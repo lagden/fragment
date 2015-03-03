@@ -12,6 +12,7 @@ module.exports = (grunt) ->
 
     project:
       prod:   'build'
+      dist:   'dist'
       dev:    'dev'
       tmp:    'tmp'
       coffee: 'coffee'
@@ -140,7 +141,8 @@ module.exports = (grunt) ->
 
     clean:
       tmp: ['<%= project.tmp %>']
-      dist: ['<%= project.prod %>']
+      prod: ['<%= project.prod %>']
+      dist: ['<%= project.dist %>']
 
     browserSync:
       dev:
@@ -234,6 +236,12 @@ module.exports = (grunt) ->
         'jade:html'
       ]
 
+    copy:
+      dist:
+        nonull: true
+        src: '<%= project.dev %>/js/components/switch.js'
+        dest: '<%= project.dist %>/switch.js'
+
   grunt.registerTask 'default', [
     'clean:tmp'
     'concurrent:dev'
@@ -253,6 +261,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', [
     'clean'
     'default'
+    'copy:dist'
     'jade:build'
     'requirejs'
     'cssmin'

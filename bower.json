@@ -1,8 +1,34 @@
 {
-  "name": "fragment",
+  "name": "switch-simple",
+  "title": "Switch Slide Simple",
+  "description": "Switch slide more simple",
   "version": "0.0.1",
+  "author": "Thiago Lagden <me@lagden.in>",
+  "keyword": [
+    "switch",
+    "slide",
+    "radio"
+    "component"
+  ],
   "dependencies": {
     "gsap": "~1.15.1",
     "eventEmitter": "~4.2.11"
-  }
+  },
+  "main": [
+    "dist/switch.js"
+  ],
+  "ignore": [
+    "bin",
+    "coffee",
+    "dev",
+    "build",
+    "jade",
+    "sass",
+    "tmp",
+    ".*",
+    "config.rb",
+    "Gruntfile.coffee",
+    "package.json",
+    "README.md"
+  ]
 }
