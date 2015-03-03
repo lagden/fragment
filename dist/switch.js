@@ -107,7 +107,7 @@ define([
           instances[id] = this;
           this.options = {
             observer: null,
-            error: '',
+            error: 'widgetSlide--error',
             widget: '',
             opts: '',
             optA: '',
@@ -116,7 +116,6 @@ define([
           };
           extend(this.options, options);
           this.css = {
-            error: 'widgetSlide--error',
             widget: 'widgetSlide',
             opts: 'widgetSlide__opt',
             optA: 'widgetSlide__opt--a',

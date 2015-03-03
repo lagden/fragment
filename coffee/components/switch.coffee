@@ -134,7 +134,7 @@ define [
           # Options
           @options =
             observer : null
-            error    : ''
+            error    : 'widgetSlide--error'
             widget   : ''
             opts     : ''
             optA     : ''
@@ -144,7 +144,6 @@ define [
           extend @options, options
 
           @css =
-            error  : 'widgetSlide--error'
             widget : 'widgetSlide'
             opts   : 'widgetSlide__opt'
             optA   : 'widgetSlide__opt--a'
