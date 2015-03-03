@@ -44,6 +44,18 @@ define [
   # Internal store of all SwitchSlide intances
   instances = {}
 
+  # Radio checked
+  checked = (radio) ->
+    radio.setAttribute 'checked', ''
+    radio.checked = true
+    return
+
+  # Radio unchecked
+  unchecked = (radio) ->
+    radio.removeAttribute 'checked'
+    radio.checked = false
+    return
+
   # Exception
   class SwitchSlideException
     constructor: (@message, @name='SwitchSlideException') ->
@@ -65,7 +77,7 @@ define [
 
       # Container exception
       if isElement @container is false
-        throw new SwitchSlideException '✖ Container must be an HTMLElement'
+        throw new SwitchSlideException '✖ The container must be an HTMLElement'
       else
         # Check if component was initialized
         initialized = SwitchSlide.data @container
@@ -78,19 +90,21 @@ define [
 
           # Options
           @options =
-            widget : ''
-            opts   : ''
-            optMin : ''
-            optMax : ''
-            knob   : ''
+            observer : null
+            error    : ''
+            widget   : ''
+            opts     : ''
+            optMin   : ''
+            optMax   : ''
+            knob     : ''
 
           extend @options, options
 
           @css =
-            initialize : 'switchSlide--initialized'
-            widget     : 'widgetSlide'
-            opts       : 'widgetSlide__opt'
-            knob       : 'widgetSlide__knob'
+            error  : 'widgetSlide--error'
+            widget : 'widgetSlide'
+            opts   : 'widgetSlide__opt'
+            knob   : 'widgetSlide__knob'
 
           for k, v of @css
             @options[k] = "#{v} #{@options[k]}".trim()
@@ -100,13 +114,14 @@ define [
           @build()
 
     build: ->
+      # Elements
       fragment = document.createDocumentFragment()
       @widget = @container.querySelector ".#{@css.widget}"
+      @widget.setAttribute 'tabindex', 0
 
       @labels = @container.getElementsByTagName 'label'
       @radios = []
 
-      # Elements
       if @labels.length != 2
         throw new SwitchSlideException '✖ No labels'
       else
@@ -115,17 +130,12 @@ define [
           radio = label.nextElementSibling
           @radios.push radio
 
-      @keys =
-        off:
-          label: @labels[0]
-          radio: @radios[0]
-        on :
-          label: @labels[1]
-          radio: @radios[1]
-
-      @knob = text document.createElement('div'), ''
+      @knob = document.createElement('div')
       classie.add @knob, @options.knob
 
+      @knobSpan = text document.createElement('span'), ''
+
+      @knob.appendChild @knobSpan
       fragment.appendChild @knob
       @widget.appendChild fragment
 
@@ -153,24 +163,77 @@ define [
       @labels[0].setAttribute 'data-endX', 0
       @labels[1].setAttribute 'data-endX', sizes.max
 
+      @min = 0
       @max = sizes.max
-      @events()
 
+      # Preparing
+      @keyCodes =
+        'space' : 32
+        'left'  : 37
+        'right' : 39
+
+      @phases = ['off', 'on']
+
+      @keys =
+        off:
+          label: @labels[0]
+          radio: @radios[0]
+          pos  : @min
+        on :
+          label: @labels[1]
+          radio: @radios[1]
+          pos  : @max
+
+      # Observer
+      observerHandler = (radio) =>
+        has = classie.has radio, @options.observer
+        method = if has then 'add' else 'remove'
+        classie[method] @widget, @options.error
+        return
+
+      hasMutation = `'MutationObserver' in window`
+      if hasMutation and @options.observer
+        observer = new MutationObserver (ms) ->
+          ms.forEach (m) ->
+            observerHandler m.target if m.attributeName == 'class'
+            return
+          return
+
+        configObserver =
+          attributes: true
+          attributeOldValue: true
+
+      # Initialize
+      for k of @keys
+        radio = @keys[k].radio
+        observer.observe radio, configObserver if observer
+        if radio.checked
+          @update @keys[k].pos
+
+      @events()
       return
 
     events: ->
-
-      tap = (event) =>
-        # event.stopPropagation()
+      # Handlers
+      tapHandler = (event) =>
+        event.stopPropagation()
+        event.preventDefault()
         el = event.currentTarget
         endX = parseInt el.getAttribute('data-endX'), 10
-        TweenLite.set @knob, x: endX
-        @update endX, true
+        @update endX
         return
 
-      # Listener
-      @labels[0].addEventListener eventType, tap, false
-      @labels[1].addEventListener eventType, tap, false
+      onKeydownHandler = (event) =>
+        switch event.keyCode
+          when @keyCodes.space
+            a = if @phase == @phases[0] then 0 else 1
+            b = a ^ 1
+            @update @keys[@phases[b]].pos
+          when @keyCodes.right
+            @update @keys['on'].pos
+          when @keyCodes.left
+            @update @keys['off'].pos
+        return
 
       onDragStartHandler = () =>
         classie.add @knob, 'is-dragging'
@@ -179,9 +242,13 @@ define [
       onDragEndHandler = () =>
         classie.remove @knob, 'is-dragging'
         endX = Math.round(@knob._gsTransform.x / @max) * @max
-        TweenLite.set @knob, x: endX
         @update endX
         return
+
+      # Listener
+      @labels[0].addEventListener eventType, tapHandler, false
+      @labels[1].addEventListener eventType, tapHandler, false
+      @widget.addEventListener 'keydown', onKeydownHandler, true
 
       # Drag
       draggie = Draggable.create @knob,
@@ -193,44 +260,45 @@ define [
         cursor: 'ew-resize'
         onDragStart: onDragStartHandler
         onDragEnd: onDragEndHandler
-
       return
 
-    update: (endX, tap) ->
-      tap = tap || false
-      k = if endX is 0 then 'off' else 'on'
-      @knob.textContent = @keys[k].label.textContent
-
-      # @keys[k].label[eventType]() if tap is false
-
-      @status()
+    update: (endX) ->
+      TweenLite.set @knob, x: endX
+      k = if endX == @min then 'off' else 'on'
+      @knobSpan.textContent = @keys[k].label.textContent
+      @status k
       return
 
-    status: ->
+    status: (phase) ->
       @phase = null
       @value = null
-      cc = 0
-      console.log @keys
-      for phase of @keys
-        radio = @keys[phase].radio
-        if radio.checked
-          @phase = phase
+
+      for k of @keys
+        radio = @keys[k].radio
+        if k == phase
+          @phase = k
           @value = radio.value
+          checked radio
+        else
+          unchecked radio
 
       m = if @phase is null then 'remove' else 'add'
       classie[m] @widget, 'has-phase'
 
       params = [
-        'instance': @
-        'phase': @phase
-        'value': @value
+        @phase
+        @value
       ]
 
-      console.trace()
-      console.table params
-
       @ee.emitEvent 'status', params
+      return
 
+    setByValue: (v) ->
+      @update @keys[k].pos for k of @keys when @keys[k].radio.value == v
+      return
+
+    reset: ->
+      @status 'reset'
       return
 
   SwitchSlide.data = (el) ->

@@ -12,16 +12,29 @@ html
     else
       script(src='/js/lib/require.js', data-main='/js/main', async)
   body
-    .switchSlide
-      .widgetSlide
-        label(for='nao') Não
-        input#nao(type='radio', title='Não', name='switch', value='N')
-        label(for='sim') Sim
-        input#sim(type='radio', title='Sim', name='switch', value='S')
 
-    .switchSlide
-      .widgetSlide
-        label(for='bad') Bad
-        input#bad(type='radio', title='Bad', name='switch', value='bad')
-        label(for='good') Good
-        input#good(type='radio', title='Good', name='switch', value='good', checked)
+    form#frm(action='index.html', method='GET')
+      .switchSlide
+        .widgetSlide
+          label(for='nao') Não
+          input#nao(type='radio', title='Não', name='switchA', value='N')
+          label(for='sim') Sim
+          input#sim(type='radio', title='Sim', name='switchA', value='S')
+
+      .switchSlide
+        .widgetSlide
+          label(for='bad') Bad
+          input#bad(type='radio', title='Bad', name='switchB', value='bad')
+          label(for='good') Good
+          input#good(type='radio', title='Good', name='switchB', value='good', checked)
+
+      .switchSlide.bigger
+        .widgetSlide
+          label(for='small') Small
+          input#small(type='radio', title='Small', name='switchC', value='small', checked)
+          label(for='big') Big
+          input#big(type='radio', title='Big', name='switchC', value='big')
+
+      div
+        button(type='submit') OK
+        button(type='reset') Reset

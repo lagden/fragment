@@ -19,6 +19,8 @@ module.exports = (grunt) ->
       sass:   'sass'
 
     coffeelint:
+      options:
+        configFile: 'coffeelint.json'
       files: ['<%= project.coffee %>/{,*/}*.coffee']
 
     coffee:
