@@ -14,7 +14,7 @@ html
   body
 
     form#frm(action='index.html', method='GET')
-      .switchSlide
+      .switchSlide.mar-r-5
         .widgetSlide
           label(for='nao') Não
           input#nao(type='radio', title='Não', name='switchA', value='N')
@@ -36,6 +36,6 @@ html
             label(for='big') Big
             input#big(type='radio', title='Big', name='switchC', value='big')
 
-      div
-        button(type='submit') OK
+      .pad-10
+        button.mar-r-5(type='submit') OK
         button(type='reset') Reset
