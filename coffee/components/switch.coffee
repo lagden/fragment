@@ -8,16 +8,6 @@ define [
   'CSSPlugin'
 ], (classie, EventEmitter, TweenLite, Draggable, CSSPlugin) ->
 
-  # Verify
-  hasTouchEvents = 'ontouchstart' of window
-  hasPointerEvents = Boolean navigator.pointerEnabled or
-                             navigator.msPointerEnabled
-  isTouch = Boolean hasTouchEvents or
-                    hasPointerEvents
-
-  # Event
-  eventType = if isTouch then 'touchend' else 'click'
-
   # Body
   docBody = document.querySelector 'body'
 
@@ -288,8 +278,10 @@ define [
         return
 
       # Listener
-      @labels[0].addEventListener eventType, tapHandler, false
-      @labels[1].addEventListener eventType, tapHandler, false
+      @labels[0].addEventListener 'click', tapHandler, false
+      @labels[0].addEventListener 'touchend', tapHandler, false
+      @labels[1].addEventListener 'click', tapHandler, false
+      @labels[1].addEventListener 'touchend', tapHandler, false
       @widget.addEventListener 'keydown', onKeydownHandler, true
 
       # Drag

@@ -6,11 +6,7 @@ define([
   'Draggable',
   'CSSPlugin'
 ], function (classie, EventEmitter, TweenLite, Draggable, CSSPlugin) {
-  var GUID, SwitchSlide, SwitchSlideException, checked, docBody, eventType, extend, getSizes, hasPointerEvents, hasTouchEvents, instances, isElement, isTouch, removeAllChildren, text, unchecked;
-  hasTouchEvents = 'ontouchstart' in window;
-  hasPointerEvents = Boolean(navigator.pointerEnabled || navigator.msPointerEnabled);
-  isTouch = Boolean(hasTouchEvents || hasPointerEvents);
-  eventType = isTouch ? 'touchend' : 'click';
+  var GUID, SwitchSlide, SwitchSlideException, checked, docBody, extend, getSizes, instances, isElement, removeAllChildren, text, unchecked;
   docBody = document.querySelector('body');
   extend = function (a, b) {
     var prop;
@@ -273,8 +269,10 @@ define([
           _this.update(endX);
         };
       }(this);
-      this.labels[0].addEventListener(eventType, tapHandler, false);
-      this.labels[1].addEventListener(eventType, tapHandler, false);
+      this.labels[0].addEventListener('click', tapHandler, false);
+      this.labels[0].addEventListener('touchend', tapHandler, false);
+      this.labels[1].addEventListener('click', tapHandler, false);
+      this.labels[1].addEventListener('touchend', tapHandler, false);
       this.widget.addEventListener('keydown', onKeydownHandler, true);
       draggie = Draggable.create(this.knob, {
         bounds: this.container,
