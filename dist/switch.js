@@ -1,11 +1,12 @@
 'use strict';
 define([
   'classie/classie',
+  'tap',
   'eventEmitter/EventEmitter',
   'TweenLite',
   'Draggable',
   'CSSPlugin'
-], function (classie, EventEmitter, TweenLite, Draggable, CSSPlugin) {
+], function (classie, Tap, EventEmitter, TweenLite, Draggable, CSSPlugin) {
   var GUID, SwitchSlide, SwitchSlideException, checked, docBody, extend, getSizes, instances, isElement, removeAllChildren, text, unchecked;
   docBody = document.querySelector('body');
   extend = function (a, b) {
@@ -82,7 +83,7 @@ define([
   }();
   SwitchSlide = function () {
     function SwitchSlide(container, options) {
-      var id, initialized, k, ref, v;
+      var id, initialized, k, ref, tap, v;
       if (false === this instanceof SwitchSlide) {
         return new SwitchSlide(container, options);
       }
@@ -101,6 +102,7 @@ define([
           id = ++GUID;
           this.container.GUID = id;
           instances[id] = this;
+          tap = new Tap(this.container);
           this.options = {
             observer: null,
             error: 'widgetSlide--error',
@@ -221,7 +223,7 @@ define([
       this.events();
     };
     SwitchSlide.prototype.events = function () {
-      var draggie, onDragEndHandler, onDragHandler, onDragStartHandler, onKeydownHandler, tapHandler;
+      var draggie, i, label, len, onDragEndHandler, onDragHandler, onDragStartHandler, onKeydownHandler, ref, tapHandler;
       tapHandler = function (_this) {
         return function (event) {
           var el, endX;
@@ -269,10 +271,11 @@ define([
           _this.update(endX);
         };
       }(this);
-      this.labels[0].addEventListener('click', tapHandler, false);
-      this.labels[0].addEventListener('touchend', tapHandler, false);
-      this.labels[1].addEventListener('click', tapHandler, false);
-      this.labels[1].addEventListener('touchend', tapHandler, false);
+      ref = this.labels;
+      for (i = 0, len = ref.length; i < len; i++) {
+        label = ref[i];
+        label.addEventListener('tap', tapHandler, false);
+      }
       this.widget.addEventListener('keydown', onKeydownHandler, true);
       draggie = Draggable.create(this.knob, {
         bounds: this.container,
