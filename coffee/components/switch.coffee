@@ -122,9 +122,6 @@ define [
           @container.GUID = id
           instances[id] = @
 
-          # Tap Event
-          tap = new Tap @container
-
           # Options
           @options =
             observer : null
@@ -159,6 +156,7 @@ define [
 
       @labels = @container.getElementsByTagName 'label'
       @radios = []
+      @taps = []
 
       labelOpts = [
         @options.optA
@@ -173,6 +171,7 @@ define [
           classie.add label, labelOpts[idx]
           radio = label.nextElementSibling
           @radios.push radio
+          @taps.push new Tap label
 
       @knob = document.createElement('div')
       classie.add @knob, @options.knob
