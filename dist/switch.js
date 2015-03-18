@@ -83,7 +83,7 @@ define([
   }();
   SwitchSlide = function () {
     function SwitchSlide(container, options) {
-      var id, initialized, k, ref, tap, v;
+      var id, initialized, k, ref, v;
       if (false === this instanceof SwitchSlide) {
         return new SwitchSlide(container, options);
       }
@@ -102,7 +102,6 @@ define([
           id = ++GUID;
           this.container.GUID = id;
           instances[id] = this;
-          tap = new Tap(this.container);
           this.options = {
             observer: null,
             error: 'widgetSlide--error',
@@ -137,6 +136,7 @@ define([
       this.widget.setAttribute('tabindex', 0);
       this.labels = this.container.getElementsByTagName('label');
       this.radios = [];
+      this.taps = [];
       labelOpts = [
         this.options.optA,
         this.options.optB
@@ -151,6 +151,7 @@ define([
           classie.add(label, labelOpts[idx]);
           radio = label.nextElementSibling;
           this.radios.push(radio);
+          this.taps.push(new Tap(label));
         }
       }
       this.knob = document.createElement('div');
