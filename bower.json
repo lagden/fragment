@@ -2,7 +2,7 @@
   "name": "switch-simple",
   "title": "Switch Slide Simple",
   "description": "Switch slide more simple",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "author": "Thiago Lagden <me@lagden.in>",
   "keyword": [
     "switch",
@@ -11,8 +11,9 @@
     "component"
   ],
   "dependencies": {
-    "gsap": "~1.15.1",
-    "eventEmitter": "~4.2.11"
+    "gsap": "~1.16.1",
+    "eventEmitter": "~4.2.11",
+    "tap.js": "lagden/tap.js#7f30c09d94aed24a59d3b557c3c3a9826d9365f5"
   },
   "main": [
     "dist/switch.js"

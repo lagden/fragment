@@ -7,8 +7,9 @@ define 'config', ->
       app: '../app'
       templates: '../templates'
       components: '../components'
-      TweenLite: './gsap/src/uncompressed/TweenLite',
-      Draggable: './gsap/src/uncompressed/utils/Draggable',
-      CSSPlugin: './gsap/src/uncompressed/plugins/CSSPlugin',
+      TweenLite: './gsap/src/uncompressed/TweenLite'
+      Draggable: './gsap/src/uncompressed/utils/Draggable'
+      CSSPlugin: './gsap/src/uncompressed/plugins/CSSPlugin'
+      tap: './tap.js/tap'
 
   return

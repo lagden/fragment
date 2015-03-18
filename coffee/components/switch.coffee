@@ -2,11 +2,12 @@
 
 define [
   'classie/classie'
+  'tap'
   'eventEmitter/EventEmitter'
   'TweenLite'
   'Draggable'
   'CSSPlugin'
-], (classie, EventEmitter, TweenLite, Draggable, CSSPlugin) ->
+], (classie, Tap, EventEmitter, TweenLite, Draggable, CSSPlugin) ->
 
   # Body
   docBody = document.querySelector 'body'
@@ -120,6 +121,9 @@ define [
           id = ++GUID
           @container.GUID = id
           instances[id] = @
+
+          # Tap Event
+          tap = new Tap @container
 
           # Options
           @options =
@@ -278,10 +282,7 @@ define [
         return
 
       # Listener
-      @labels[0].addEventListener 'click', tapHandler, false
-      @labels[0].addEventListener 'touchend', tapHandler, false
-      @labels[1].addEventListener 'click', tapHandler, false
-      @labels[1].addEventListener 'touchend', tapHandler, false
+      label.addEventListener 'tap', tapHandler, false for label in @labels
       @widget.addEventListener 'keydown', onKeydownHandler, true
 
       # Drag
