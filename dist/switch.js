@@ -223,35 +223,31 @@ define([
       }
       this.events();
     };
+    SwitchSlide.prototype.tapHandler = function (event) {
+      var el, endX;
+      event.stopPropagation();
+      event.preventDefault();
+      el = event.currentTarget;
+      endX = parseInt(el.getAttribute('data-endX'), 10);
+      this.update(endX);
+    };
+    SwitchSlide.prototype.onKeydownHandler = function (event) {
+      var a, b;
+      switch (event.keyCode) {
+      case this.keyCodes.space:
+        a = this.phase === this.phases[0] ? 0 : 1;
+        b = a ^ 1;
+        this.update(this.keys[this.phases[b]].pos);
+        break;
+      case this.keyCodes.right:
+        this.update(this.keys.on.pos);
+        break;
+      case this.keyCodes.left:
+        this.update(this.keys.off.pos);
+      }
+    };
     SwitchSlide.prototype.events = function () {
-      var draggie, i, label, len, onDragEndHandler, onDragHandler, onDragStartHandler, onKeydownHandler, ref, tapHandler;
-      tapHandler = function (_this) {
-        return function (event) {
-          var el, endX;
-          event.stopPropagation();
-          event.preventDefault();
-          el = event.currentTarget;
-          endX = parseInt(el.getAttribute('data-endX'), 10);
-          _this.update(endX);
-        };
-      }(this);
-      onKeydownHandler = function (_this) {
-        return function (event) {
-          var a, b;
-          switch (event.keyCode) {
-          case _this.keyCodes.space:
-            a = _this.phase === _this.phases[0] ? 0 : 1;
-            b = a ^ 1;
-            _this.update(_this.keys[_this.phases[b]].pos);
-            break;
-          case _this.keyCodes.right:
-            _this.update(_this.keys.on.pos);
-            break;
-          case _this.keyCodes.left:
-            _this.update(_this.keys.off.pos);
-          }
-        };
-      }(this);
+      var draggie, i, label, len, onDragEndHandler, onDragHandler, onDragStartHandler, ref;
       onDragStartHandler = function (_this) {
         return function () {
           classie.add(_this.knob, 'is-dragging');
@@ -275,9 +271,9 @@ define([
       ref = this.labels;
       for (i = 0, len = ref.length; i < len; i++) {
         label = ref[i];
-        label.addEventListener('tap', tapHandler, false);
+        label.addEventListener('tap', this, false);
       }
-      this.widget.addEventListener('keydown', onKeydownHandler, true);
+      this.widget.addEventListener('keydown', this, true);
       draggie = Draggable.create(this.knob, {
         bounds: this.container,
         edgeResistance: 0.65,
@@ -329,6 +325,15 @@ define([
     };
     SwitchSlide.prototype.reset = function () {
       this.status('reset');
+    };
+    SwitchSlide.prototype.handleEvent = function (event) {
+      switch (event.type) {
+      case 'tap':
+        this.tapHandler(event);
+        break;
+      case 'keydown':
+        this.onKeydownHandler(event);
+      }
     };
     return SwitchSlide;
   }();

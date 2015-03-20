@@ -243,27 +243,27 @@ define [
       @events()
       return
 
-    events: ->
-      # Handlers
-      tapHandler = (event) =>
-        event.stopPropagation()
-        event.preventDefault()
-        el = event.currentTarget
-        endX = parseInt el.getAttribute('data-endX'), 10
-        @update endX
-        return
+    tapHandler: (event) ->
+      event.stopPropagation()
+      event.preventDefault()
+      el = event.currentTarget
+      endX = parseInt el.getAttribute('data-endX'), 10
+      @update endX
+      return
 
-      onKeydownHandler = (event) =>
-        switch event.keyCode
-          when @keyCodes.space
-            a = if @phase == @phases[0] then 0 else 1
-            b = a ^ 1
-            @update @keys[@phases[b]].pos
-          when @keyCodes.right
-            @update @keys['on'].pos
-          when @keyCodes.left
-            @update @keys['off'].pos
-        return
+    onKeydownHandler: (event) ->
+      switch event.keyCode
+        when @keyCodes.space
+          a = if @phase == @phases[0] then 0 else 1
+          b = a ^ 1
+          @update @keys[@phases[b]].pos
+        when @keyCodes.right
+          @update @keys['on'].pos
+        when @keyCodes.left
+          @update @keys['off'].pos
+      return
+
+    events: ->
 
       onDragStartHandler = () =>
         classie.add @knob, 'is-dragging'
@@ -281,8 +281,8 @@ define [
         return
 
       # Listener
-      label.addEventListener 'tap', tapHandler, false for label in @labels
-      @widget.addEventListener 'keydown', onKeydownHandler, true
+      label.addEventListener 'tap', @, false for label in @labels
+      @widget.addEventListener 'keydown', @, true
 
       # Drag
       draggie = Draggable.create @knob,
@@ -334,6 +334,12 @@ define [
 
     reset: ->
       @status 'reset'
+      return
+
+    handleEvent: (event) ->
+      switch event.type
+        when 'tap' then @tapHandler event
+        when 'keydown' then @onKeydownHandler event
       return
 
   SwitchSlide.data = (el) ->
