@@ -103,6 +103,7 @@ define([
           this.container.GUID = id;
           instances[id] = this;
           this.options = {
+            drag: true,
             observer: null,
             error: 'widgetSlide--error',
             widget: '',
@@ -231,10 +232,12 @@ define([
         label.addEventListener('tap', this, false);
       }
       this.widget.addEventListener('keydown', this, true);
-      this.dragger = new Dragger(this.knob, this.min, this.max);
-      this.dragger.on('update', function (endX) {
-        return that.update(endX);
-      });
+      if (this.options.drag) {
+        this.dragger = new Dragger(this.knob, this.min, this.max);
+        this.dragger.on('update', function (endX) {
+          return that.update(endX);
+        });
+      }
     };
     SwitchSlide.prototype.tapHandler = function (event) {
       var el, endX;

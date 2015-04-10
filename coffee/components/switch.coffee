@@ -131,6 +131,7 @@ define [
 
           # Options
           @options =
+            drag     : true
             observer : null
             error    : 'widgetSlide--error'
             widget   : ''
@@ -256,9 +257,11 @@ define [
       that = @
       label.addEventListener 'tap', @, false for label in @labels
       @widget.addEventListener 'keydown', @, true
-      @dragger = new Dragger @knob, @min, @max
-      @dragger.on 'update', (endX) ->
-        that.update endX
+
+      if @options.drag
+        @dragger = new Dragger @knob, @min, @max
+        @dragger.on 'update', (endX) ->
+          that.update endX
       return
 
     tapHandler: (event) ->
