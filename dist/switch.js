@@ -1,15 +1,15 @@
 'use strict';
 define([
-  'classie/classie',
-  'tap',
+  './dragger',
   'eventEmitter/EventEmitter',
-  'TweenLite',
-  'Draggable',
-  'CSSPlugin'
-], function (classie, Tap, EventEmitter, TweenLite, Draggable, CSSPlugin) {
-  var GUID, SwitchSlide, SwitchSlideException, checked, docBody, extend, getSizes, instances, isElement, removeAllChildren, text, unchecked;
+  'tap',
+  'classie/classie',
+  'get-style-property/get-style-property'
+], function (Dragger, EventEmitter, Tap, classie, getStyleProperty) {
+  var GUID, SwitchSlide, SwitchSlideException, checked, docBody, extendObject, getSizes, instances, isElement, removeAllChildren, text, transform, unchecked;
+  transform = getStyleProperty('transform');
   docBody = document.querySelector('body');
-  extend = function (a, b) {
+  extendObject = function (a, b) {
     var prop;
     for (prop in b) {
       a[prop] = b[prop];
@@ -111,7 +111,7 @@ define([
             optB: '',
             knob: ''
           };
-          extend(this.options, options);
+          extendObject(this.options, options);
           this.css = {
             widget: 'widgetSlide',
             opts: 'widgetSlide__opt',
@@ -130,7 +130,8 @@ define([
       }
     }
     SwitchSlide.prototype.build = function () {
-      var configObserver, fragment, hasMutation, i, idx, k, label, labelOpts, len, observer, observerHandler, radio, ref, sizes;
+      var configObserver, fragment, hasMutation, i, idx, k, label, labelOpts, len, observer, observerHandler, radio, ref, sizes, that;
+      that = this;
       fragment = document.createDocumentFragment();
       this.widget = this.container.querySelector('.' + this.css.widget);
       this.widget.setAttribute('tabindex', 0);
@@ -190,14 +191,12 @@ define([
           pos: this.max
         }
       };
-      observerHandler = function (_this) {
-        return function (radio) {
-          var has, method;
-          has = classie.has(radio, _this.options.observer);
-          method = has ? 'add' : 'remove';
-          classie[method](_this.widget, _this.options.error);
-        };
-      }(this);
+      observerHandler = function (radio) {
+        var has, method;
+        has = classie.has(radio, that.options.observer);
+        method = has ? 'add' : 'remove';
+        classie[method](that.widget, that.options.error);
+      };
       hasMutation = 'MutationObserver' in window;
       if (hasMutation && this.options.observer) {
         observer = new MutationObserver(function (ms) {
@@ -221,7 +220,21 @@ define([
           this.update(this.keys[k].pos);
         }
       }
-      this.events();
+      this.listeners();
+    };
+    SwitchSlide.prototype.listeners = function () {
+      var i, label, len, ref, that;
+      that = this;
+      ref = this.labels;
+      for (i = 0, len = ref.length; i < len; i++) {
+        label = ref[i];
+        label.addEventListener('tap', this, false);
+      }
+      this.widget.addEventListener('keydown', this, true);
+      this.dragger = new Dragger(this.knob, this.min, this.max);
+      this.dragger.on('update', function (endX) {
+        return that.update(endX);
+      });
     };
     SwitchSlide.prototype.tapHandler = function (event) {
       var el, endX;
@@ -246,49 +259,9 @@ define([
         this.update(this.keys.off.pos);
       }
     };
-    SwitchSlide.prototype.events = function () {
-      var draggie, i, label, len, onDragEndHandler, onDragHandler, onDragStartHandler, ref;
-      onDragStartHandler = function (_this) {
-        return function () {
-          classie.add(_this.knob, 'is-dragging');
-        };
-      }(this);
-      onDragHandler = function (_this) {
-        return function () {
-          var currentX;
-          currentX = Math.min(_this.max, Math.max(_this.knob._gsTransform.x, _this.min));
-          TweenLite.set(_this.knob, { x: currentX });
-        };
-      }(this);
-      onDragEndHandler = function (_this) {
-        return function () {
-          var endX;
-          classie.remove(_this.knob, 'is-dragging');
-          endX = Math.round(_this.knob._gsTransform.x / _this.max) * _this.max;
-          _this.update(endX);
-        };
-      }(this);
-      ref = this.labels;
-      for (i = 0, len = ref.length; i < len; i++) {
-        label = ref[i];
-        label.addEventListener('tap', this, false);
-      }
-      this.widget.addEventListener('keydown', this, true);
-      draggie = Draggable.create(this.knob, {
-        bounds: this.container,
-        edgeResistance: 0.65,
-        type: 'x',
-        lockAxis: 'x',
-        force3D: true,
-        cursor: 'ew-resize',
-        onDragStart: onDragStartHandler,
-        onDrag: onDragHandler,
-        onDragEnd: onDragEndHandler
-      });
-    };
     SwitchSlide.prototype.update = function (endX) {
       var k;
-      TweenLite.set(this.knob, { x: endX });
+      this.knob.style[transform] = 'translate3d(' + endX + 'px, 0, 0)';
       k = endX === this.min ? 'off' : 'on';
       this.knobSpan.textContent = this.keys[k].label.textContent;
       this.status(k);

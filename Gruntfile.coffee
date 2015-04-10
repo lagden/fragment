@@ -238,9 +238,16 @@ module.exports = (grunt) ->
 
     copy:
       dist:
-        nonull: true
-        src: '<%= project.dev %>/js/components/switch.js'
-        dest: '<%= project.dist %>/switch.js'
+        files: [
+          expand: true
+          flatten: true
+          src: [
+            '<%= project.dev %>/js/components/switch.js'
+            '<%= project.dev %>/js/components/dragger.js'
+          ]
+          dest: '<%= project.dist %>'
+          filter: 'isFile'
+        ]
 
   grunt.registerTask 'default', [
     'clean:tmp'

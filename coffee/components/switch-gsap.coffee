@@ -1,26 +1,19 @@
 'use strict'
 
 define [
-  './dragger'
-  'eventEmitter/EventEmitter'
-  'tap'
   'classie/classie'
-  'get-style-property/get-style-property'
-], (
-  Dragger,
-  EventEmitter,
-  Tap,
-  classie,
-  getStyleProperty
-) ->
-
-  transform = getStyleProperty 'transform'
+  'tap'
+  'eventEmitter/EventEmitter'
+  'TweenLite'
+  'Draggable'
+  'CSSPlugin'
+], (classie, Tap, EventEmitter, TweenLite, Draggable, CSSPlugin) ->
 
   # Body
   docBody = document.querySelector 'body'
 
   # Extend object
-  extendObject = (a, b) ->
+  extend = (a, b) ->
     a[prop] = b[prop] for prop of b
     return a
 
@@ -139,7 +132,7 @@ define [
             optB     : ''
             knob     : ''
 
-          extendObject @options, options
+          extend @options, options
 
           @css =
             widget : 'widgetSlide'
@@ -156,8 +149,6 @@ define [
           @build()
 
     build: ->
-      that = @
-
       # Elements
       fragment = document.createDocumentFragment()
       @widget = @container.querySelector ".#{@css.widget}"
@@ -218,16 +209,16 @@ define [
           label: @labels[0]
           radio: @radios[0]
           pos  : @min
-        on:
+        on :
           label: @labels[1]
           radio: @radios[1]
           pos  : @max
 
       # Observer
-      observerHandler = (radio) ->
-        has = classie.has radio, that.options.observer
+      observerHandler = (radio) =>
+        has = classie.has radio, @options.observer
         method = if has then 'add' else 'remove'
-        classie[method] that.widget, that.options.error
+        classie[method] @widget, @options.error
         return
 
       hasMutation = `'MutationObserver' in window`
@@ -249,16 +240,13 @@ define [
         if radio.checked
           @update @keys[k].pos
 
-      @listeners()
+      @events()
       return
 
-    listeners: ->
-      that = @
-      label.addEventListener 'tap', @, false for label in @labels
-      @widget.addEventListener 'keydown', @, true
-      @dragger = new Dragger @knob, @min, @max
-      @dragger.on 'update', (endX) ->
-        that.update endX
+    clickHandler: (event) ->
+      console.log 'clickHandler'
+      event.stopPropagation()
+      event.preventDefault()
       return
 
     tapHandler: (event) ->
@@ -281,8 +269,45 @@ define [
           @update @keys['off'].pos
       return
 
+    events: ->
+
+      that = @
+
+      onDragStartHandler = ->
+        classie.add that.knob, 'is-dragging'
+        return
+
+      onDragHandler = ->
+        currentX = Math.min that.max,
+                            Math.max that.knob._gsTransform.x, that.min
+        TweenLite.set that.knob, x: currentX
+        return
+
+      onDragEndHandler = ->
+        classie.remove that.knob, 'is-dragging'
+        endX = Math.round(that.knob._gsTransform.x / that.max) * that.max
+        that.update endX
+        return
+
+      # Listener
+      label.addEventListener 'click', @, false for label in @labels
+      @widget.addEventListener 'keydown', @, true
+
+      # Drag
+      @draggie = new Draggable @knob,
+        bounds: @container
+        edgeResistance: 0.65
+        type: 'x'
+        lockAxis: 'x',
+        force3D: true
+        cursor: 'ew-resize'
+        onDragStart: onDragStartHandler
+        onDrag: onDragHandler
+        onDragEnd: onDragEndHandler
+      return
+
     update: (endX) ->
-      @knob.style[transform] = "translate3d(#{endX}px, 0, 0)"
+      TweenLite.set @knob, x: endX
       k = if endX == @min then 'off' else 'on'
       @knobSpan.textContent = @keys[k].label.textContent
       @status k
@@ -322,7 +347,9 @@ define [
 
     handleEvent: (event) ->
       switch event.type
-        when 'tap' then @tapHandler event
+        # when 'click' then @clickHandler event
+        when 'click' then @tapHandler event
+        # when 'tap' then @tapHandler event
         when 'keydown' then @onKeydownHandler event
       return
 
