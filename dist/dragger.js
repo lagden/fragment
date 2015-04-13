@@ -18,27 +18,42 @@ define([
   'classie/classie',
   'get-style-property/get-style-property'
 ], function (Unidragger, classie, getStyleProperty) {
-  var Dragger, getMatrix, transform;
+  var Dragger, getMatrix, prefixes, transform;
   transform = getStyleProperty('transform');
+  prefixes = [
+    '',
+    '-moz-',
+    '-ms-',
+    '-o-',
+    '-webkit-'
+  ];
   getMatrix = function (el) {
-    var cs, m, p, parse;
+    var cs, i, len, m, p, parse, prefix;
     cs = window.getComputedStyle(el, null);
-    m = cs.getPropertyValue(transform);
-    p = m.match(/[\-0-9]+/g);
-    if (p !== null) {
-      return parse = p.map(function (n) {
-        return parseInt(n, 10);
-      });
-    } else {
-      return parse = [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ];
+    for (i = 0, len = prefixes.length; i < len; i++) {
+      prefix = prefixes[i];
+      m = cs.getPropertyValue(prefix + 'transform');
+      if (m !== null) {
+        break;
+      }
     }
+    parse = [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ];
+    if (m) {
+      p = m.match(/[\-0-9]+/g);
+      if (p !== null) {
+        parse = p.map(function (n) {
+          return parseInt(n, 10);
+        });
+      }
+    }
+    return parse;
   };
   return Dragger = function (superClass) {
     extend(Dragger, superClass);
@@ -50,20 +65,17 @@ define([
       this.bindHandles();
     }
     Dragger.prototype.dragStart = function (event, pointer) {
-      console.log('dragStart');
       classie.add(this.element, 'is-dragging');
       this.pos = getMatrix(this.element);
     };
     Dragger.prototype.dragMove = function (event, pointer, moveVector) {
       var currentX, dragX;
-      console.log('dragMove');
       dragX = moveVector.x + this.pos[4];
       currentX = Math.min(this.max, Math.max(dragX, this.min));
       this.element.style[transform] = 'translate3d(' + currentX + 'px, 0, 0)';
     };
     Dragger.prototype.dragEnd = function (event, pointer) {
       var endX;
-      console.log('dragEnd');
       classie.remove(this.element, 'is-dragging');
       this.pos = getMatrix(this.element);
       endX = Math.round(this.pos[4] / this.max) * this.max;

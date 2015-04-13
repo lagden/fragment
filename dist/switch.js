@@ -302,6 +302,22 @@ define([
     SwitchSlide.prototype.reset = function () {
       this.status('reset');
     };
+    SwitchSlide.prototype.destroy = function () {
+      var i, j, label, len, len1, ref, ref1, tap;
+      ref = this.labels;
+      for (i = 0, len = ref.length; i < len; i++) {
+        label = ref[i];
+        label.removeEventListener('tap', this, false);
+      }
+      this.widget.removeEventListener('keydown', this, true);
+      ref1 = this.taps;
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        tap = ref1[j];
+        tap.destroy();
+      }
+      this.knob = removeAllChildren(this.knob);
+      this.widget.removeChild(this.knob);
+    };
     SwitchSlide.prototype.handleEvent = function (event) {
       switch (event.type) {
       case 'tap':

@@ -323,6 +323,14 @@ define [
       @status 'reset'
       return
 
+    destroy: ->
+      label.removeEventListener 'tap', @, false for label in @labels
+      @widget.removeEventListener 'keydown', @, true
+      tap.destroy() for tap in @taps
+      @knob = removeAllChildren @knob
+      @widget.removeChild @knob
+      return
+
     handleEvent: (event) ->
       switch event.type
         when 'tap' then @tapHandler event
