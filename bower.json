@@ -2,7 +2,7 @@
   "name": "switch-simple",
   "title": "Switch Slide Simple",
   "description": "Switch slide more simple",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Thiago Lagden <me@lagden.in>",
   "keyword": [
     "switch",
@@ -14,7 +14,6 @@
     "eventEmitter": "~4.2.11",
     "classie": "~1.0.1",
     "get-style-property": "~1.0.4",
-    "tap.js": "alexgibson/tap.js#67da85fa4bf0a61fa5fc39d3ad98b00b4719bc5a",
     "unidragger": "~1.1.1"
   },
   "main": [

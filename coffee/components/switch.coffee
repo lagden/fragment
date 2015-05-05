@@ -3,13 +3,11 @@
 define [
   './dragger'
   'eventEmitter/EventEmitter'
-  'tap'
   'classie/classie'
   'get-style-property/get-style-property'
 ], (
   Dragger,
   EventEmitter,
-  Tap,
   classie,
   getStyleProperty
 ) ->
@@ -17,7 +15,7 @@ define [
   transform = getStyleProperty 'transform'
 
   # Body
-  docBody = document.querySelector 'body'
+  docBody = document.body || document.querySelector 'body'
 
   # Extend object
   extendObject = (a, b) ->
@@ -166,7 +164,6 @@ define [
 
       @labels = @container.getElementsByTagName 'label'
       @radios = []
-      @taps = []
 
       labelOpts = [
         @options.optA
@@ -181,7 +178,6 @@ define [
           classie.add label, labelOpts[idx]
           radio = label.nextElementSibling
           @radios.push radio
-          @taps.push new Tap label
 
       @knob = document.createElement('div')
       classie.add @knob, @options.knob
@@ -255,7 +251,7 @@ define [
 
     listeners: ->
       that = @
-      label.addEventListener 'tap', @, false for label in @labels
+      label.addEventListener 'click', @, false for label in @labels
       @widget.addEventListener 'keydown', @, true
 
       if @options.drag
@@ -324,16 +320,15 @@ define [
       return
 
     destroy: ->
-      label.removeEventListener 'tap', @, false for label in @labels
+      label.removeEventListener 'click', @, false for label in @labels
       @widget.removeEventListener 'keydown', @, true
-      tap.destroy() for tap in @taps
       @knob = removeAllChildren @knob
       @widget.removeChild @knob
       return
 
     handleEvent: (event) ->
       switch event.type
-        when 'tap' then @tapHandler event
+        when 'click' then @tapHandler event
         when 'keydown' then @onKeydownHandler event
       return
 

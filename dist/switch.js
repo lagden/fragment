@@ -2,13 +2,12 @@
 define([
   './dragger',
   'eventEmitter/EventEmitter',
-  'tap',
   'classie/classie',
   'get-style-property/get-style-property'
-], function (Dragger, EventEmitter, Tap, classie, getStyleProperty) {
+], function (Dragger, EventEmitter, classie, getStyleProperty) {
   var GUID, SwitchSlide, SwitchSlideException, checked, docBody, extendObject, getSizes, instances, isElement, removeAllChildren, text, transform, unchecked;
   transform = getStyleProperty('transform');
-  docBody = document.querySelector('body');
+  docBody = document.body || document.querySelector('body');
   extendObject = function (a, b) {
     var prop;
     for (prop in b) {
@@ -138,7 +137,6 @@ define([
       this.widget.setAttribute('tabindex', 0);
       this.labels = this.container.getElementsByTagName('label');
       this.radios = [];
-      this.taps = [];
       labelOpts = [
         this.options.optA,
         this.options.optB
@@ -153,7 +151,6 @@ define([
           classie.add(label, labelOpts[idx]);
           radio = label.nextElementSibling;
           this.radios.push(radio);
-          this.taps.push(new Tap(label));
         }
       }
       this.knob = document.createElement('div');
@@ -229,7 +226,7 @@ define([
       ref = this.labels;
       for (i = 0, len = ref.length; i < len; i++) {
         label = ref[i];
-        label.addEventListener('tap', this, false);
+        label.addEventListener('click', this, false);
       }
       this.widget.addEventListener('keydown', this, true);
       if (this.options.drag) {
@@ -303,24 +300,19 @@ define([
       this.status('reset');
     };
     SwitchSlide.prototype.destroy = function () {
-      var i, j, label, len, len1, ref, ref1, tap;
+      var i, label, len, ref;
       ref = this.labels;
       for (i = 0, len = ref.length; i < len; i++) {
         label = ref[i];
-        label.removeEventListener('tap', this, false);
+        label.removeEventListener('click', this, false);
       }
       this.widget.removeEventListener('keydown', this, true);
-      ref1 = this.taps;
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        tap = ref1[j];
-        tap.destroy();
-      }
       this.knob = removeAllChildren(this.knob);
       this.widget.removeChild(this.knob);
     };
     SwitchSlide.prototype.handleEvent = function (event) {
       switch (event.type) {
-      case 'tap':
+      case 'click':
         this.tapHandler(event);
         break;
       case 'keydown':
