@@ -5,7 +5,6 @@ bower_components
 /dev/js
 /dev/css
 /dev/**/*.html
-/bin
 /tmp
 
 # Others
